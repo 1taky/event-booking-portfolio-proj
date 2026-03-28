@@ -1,5 +1,6 @@
 package com.portfolio.bookingapp.services.impl;
 
+import com.portfolio.bookingapp.exeptions.AlreadyExistException;
 import com.portfolio.bookingapp.exeptions.NotExistException;
 import com.portfolio.bookingapp.models.Event;
 import com.portfolio.bookingapp.repositories.EventRepository;
@@ -10,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -21,10 +21,18 @@ public class EventServiceImpl implements EventService {
 
     public ResponseEntity<Event> createEvent(Event event)
             throws NotExistException {
+//        if (eventRepository.findById(event.getId()).isPresent()) {
+//            throw new AlreadyExistException("Event already exists");
+//        }
         if (venueRepository.findById(event.getVenue().getId()).isEmpty()) {
             throw new NotExistException("Venue not found");
         }
+        else if(eventRepository.findById(event.getVenue().getId()).isPresent()) {
+            throw new AlreadyExistException("Venue already exist");
+        }
+
         eventRepository.save(event);
+
         return new ResponseEntity<>(event, HttpStatus.CREATED);
     }
 
@@ -33,11 +41,13 @@ public class EventServiceImpl implements EventService {
         if (eventRepository.findById(id).isEmpty() || venueRepository.findById(event.getVenue().getId()).isEmpty()) {
             throw new NotExistException("Venue not found");
         }
+
         return eventRepository.save(event);
     }
 
     public Event getEventById(long id) throws IllegalArgumentException, NotExistException {
         if (id <= 0) throw new IllegalArgumentException("Incorrect parameter for Event");
+
         return eventRepository.findById(id)
                 .orElseThrow(() -> new NotExistException("Event does not exist"));
     }

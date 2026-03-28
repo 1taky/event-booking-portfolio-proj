@@ -1,6 +1,5 @@
 package com.portfolio.bookingapp.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.portfolio.bookingapp.models.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -17,8 +16,8 @@ import java.time.LocalDateTime;
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    int seats;
+    Long id;
+    Integer seats;
     LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)

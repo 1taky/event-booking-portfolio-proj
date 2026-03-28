@@ -1,5 +1,6 @@
 package com.portfolio.bookingapp.exeptions.handler;
 
+import com.portfolio.bookingapp.exeptions.AlreadyExistException;
 import com.portfolio.bookingapp.exeptions.IncorrectDataException;
 import com.portfolio.bookingapp.exeptions.NotExistException;
 import org.springframework.http.HttpStatus;
@@ -30,5 +31,15 @@ public class GlobalExeptionHandler{
         err.put("message", ex.getMessage());
 
         return new ResponseEntity<>(err, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AlreadyExistException.class)
+    public ResponseEntity<Map<String, String>> handleAlreadyExistException(AlreadyExistException ex) {
+        Map<String,String> err = new HashMap<>();
+
+        err.put("error", "Already exist");
+        err.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(err, HttpStatus.CONFLICT);
     }
 }

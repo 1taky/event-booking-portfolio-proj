@@ -1,8 +1,11 @@
 package com.portfolio.bookingapp.controllers;
 
+import com.portfolio.bookingapp.dto.VenueRequest;
+import com.portfolio.bookingapp.dto.VenueResponse;
 import com.portfolio.bookingapp.models.Venue;
 import com.portfolio.bookingapp.services.VenueService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,13 +28,13 @@ public class VenueController {
     }
 
     @PostMapping
-    public ResponseEntity<Venue> addVenue(@RequestBody Venue venue) {
-        return venueService.createVenue(venue);
+    public ResponseEntity<VenueResponse> addVenue(@RequestBody VenueRequest request) {
+        return new ResponseEntity<>(venueService.createVenue(request), HttpStatus.CREATED);
     }
 
     @PutMapping("{id}")
-    public Venue updateVenue(@PathVariable Long id, @RequestBody Venue venue) {
-        return venueService.updateVenue(id, venue);
+    public ResponseEntity<String> updateVenue(@PathVariable Long id, @RequestBody VenueRequest request) {
+        return new ResponseEntity<>(venueService.updateVenue(id, request), HttpStatus.OK);
     }
 
     @DeleteMapping("{id}")

@@ -1,7 +1,6 @@
 package com.portfolio.bookingapp.security;
 
 
-import com.portfolio.bookingapp.models.enums.Roles;
 import com.portfolio.bookingapp.repositories.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,9 +21,6 @@ import java.util.List;
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserRepository userRepository;
     private final JwtService jwtService;
-
-    Roles roles;
-
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
