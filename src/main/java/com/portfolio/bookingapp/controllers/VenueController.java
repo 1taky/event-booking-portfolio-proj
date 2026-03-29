@@ -18,13 +18,13 @@ public class VenueController {
     private final VenueService venueService;
 
     @GetMapping
-    public List<Venue> getVenues() {
-        return venueService.getAllVenues();
+    public ResponseEntity<List<Venue>> getVenues() {
+        return new ResponseEntity<>(venueService.getAllVenues(), HttpStatus.OK);
     }
 
     @GetMapping("{id}")
-    public Venue getVenue(@PathVariable Long id) {
-        return venueService.getVenueById(id);
+    public ResponseEntity<VenueResponse> getVenue(@PathVariable Long id) {
+        return new ResponseEntity<>(venueService.getVenueById(id),  HttpStatus.OK);
     }
 
     @PostMapping
@@ -33,7 +33,7 @@ public class VenueController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<String> updateVenue(@PathVariable Long id, @RequestBody VenueRequest request) {
+    public ResponseEntity<VenueResponse> updateVenue(@PathVariable Long id, @RequestBody VenueRequest request) {
         return new ResponseEntity<>(venueService.updateVenue(id, request), HttpStatus.OK);
     }
 

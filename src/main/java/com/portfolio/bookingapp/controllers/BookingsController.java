@@ -28,8 +28,8 @@ public class BookingsController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> cancelBooking(@PathVariable Long id,  @RequestBody Booking booking) {
-        bookingService.cancelBooking(id,  booking);
+    public ResponseEntity<Void> cancelBooking(@PathVariable Long id,  @RequestBody BookingRequest booking) {
+        bookingService.cancelBooking(id, booking);
         return ResponseEntity.noContent().build();
     }
 }

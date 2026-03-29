@@ -1,17 +1,20 @@
 package com.portfolio.bookingapp.services.impl;
 
+import com.portfolio.bookingapp.dto.EventRequest;
+import com.portfolio.bookingapp.dto.EventResponse;
 import com.portfolio.bookingapp.exeptions.AlreadyExistException;
 import com.portfolio.bookingapp.exeptions.NotExistException;
 import com.portfolio.bookingapp.models.Event;
+import com.portfolio.bookingapp.models.Venue;
 import com.portfolio.bookingapp.repositories.EventRepository;
 import com.portfolio.bookingapp.repositories.VenueRepository;
 import com.portfolio.bookingapp.services.EventService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,21 +22,38 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final VenueRepository venueRepository;
 
-    public ResponseEntity<Event> createEvent(Event event)
+    public EventResponse createEvent(EventRequest request)
             throws NotExistException {
-//        if (eventRepository.findById(event.getId()).isPresent()) {
-//            throw new AlreadyExistException("Event already exists");
-//        }
-        if (venueRepository.findById(event.getVenue().getId()).isEmpty()) {
+        if (venueRepository.findById(request.getVenueId()).isEmpty()) {
             throw new NotExistException("Venue not found");
         }
-        else if(eventRepository.findById(event.getVenue().getId()).isPresent()) {
-            throw new AlreadyExistException("Venue already exist");
+
+        Optional<Venue> venue = venueRepository.findById(request.getVenueId());
+
+        Event event = new Event();
+
+        if (venue.isPresent()) {
+            event.setTitle(request.getTitle());
+            event.setDescription(request.getDescription());
+            event.setPrice(request.getPrice());
+            event.setDateTime(request.getDateTime());
+            event.setAvailableSeats(request.getAvailableSeats());
+            event.setVenue(venue.get());
+        }
+
+        if (eventRepository.getEventByTitleAndVenueId(event.getTitle(), event.getVenue().getId())) {
+            throw new AlreadyExistException("Event already exists");
         }
 
         eventRepository.save(event);
 
-        return new ResponseEntity<>(event, HttpStatus.CREATED);
+        return new EventResponse(
+                event.getTitle(),
+                event.getDescription(),
+                event.getAvailableSeats(),
+                event.getPrice(),
+                event.getDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy | HH:mm:ss")),
+                event.getVenue());
     }
 
     public Event updateEvent(Long id, Event event)

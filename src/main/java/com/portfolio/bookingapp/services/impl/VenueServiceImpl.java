@@ -35,20 +35,32 @@ public class VenueServiceImpl implements VenueService {
         return venueResponse;
     }
 
-    public String updateVenue(Long id, VenueRequest request) {
+    public VenueResponse updateVenue(Long id, VenueRequest request) {
         if(venueRepository.findById(id).isEmpty())
             throw new NotExistException("Venue not found");
 
         Venue savedVenue = venueRepository.save(getVenueFromRequest(request));
 
-        return "Venue with ID: " + savedVenue.getId() + "updated successfully" ;
+        VenueResponse venueResponse = new VenueResponse();
+        venueResponse.setId(savedVenue.getId());
+        venueResponse.setName(savedVenue.getName());
+        venueResponse.setAddress(savedVenue.getAddress());
+
+        return venueResponse ;
     }
 
-    public Venue getVenueById(long id)
+    public VenueResponse getVenueById(long id)
             throws IllegalArgumentException, NotExistException {
         if (id <= 0) throw new IllegalArgumentException("Incorrect parameter for Venue");
-        return venueRepository.findById(id)
+        Venue saved = venueRepository.findById(id)
                 .orElseThrow(() -> new NotExistException("Venue does not exist"));
+
+        VenueResponse venueResponse = new VenueResponse();
+        venueResponse.setId(saved.getId());
+        venueResponse.setName(saved.getName());
+        venueResponse.setAddress(saved.getAddress());
+
+        return venueResponse;
     }
 
     public List<Venue> getAllVenues() {

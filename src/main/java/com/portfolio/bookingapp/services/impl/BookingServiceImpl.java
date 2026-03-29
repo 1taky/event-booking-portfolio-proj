@@ -65,28 +65,33 @@ public class BookingServiceImpl implements BookingService {
         );
     }
 
-    public Booking cancelBooking(Long id, Booking booking)
+    public BookingResponse cancelBooking(Long id, BookingRequest booking)
             throws IncorrectDataException {
-        Event event = eventRepository.findById(booking.getEvent().getId()).orElseThrow(
+        Event event = eventRepository.findById(booking.getEventId()).orElseThrow(
                 () -> new NotExistException("Event not found"));
 
-        if (bookingRepository.findById(id).isPresent()) {
-            if (booking.getBookingStatus().equals(BookingStatus.CONFIRMED)) {
+        Optional<Booking> found = bookingRepository.findById(id);
+
+        if (found.isPresent()) {
+            if (found.get().getBookingStatus().equals(BookingStatus.CONFIRMED)) {
                 event.setAvailableSeats(event.getAvailableSeats() + booking.getSeats());
-                booking.setBookingStatus(BookingStatus.CANCELLED);
+                found.get().setBookingStatus(BookingStatus.CANCELLED);
                 eventRepository.save(event);
             }
-            else if(booking.getBookingStatus().equals(BookingStatus.CANCELLED))
+            else if(found.get().getBookingStatus().equals(BookingStatus.CANCELLED))
                 throw new IncorrectDataException("Booking is already cancelled");
 
         } else throw new IncorrectDataException("Incorrect booking id or status");
 
-        return bookingRepository.save(booking);
+        bookingRepository.save(found.get());
+        return new BookingResponse(
+                found.get().getId(),
+                found.get().getSeats(),
+                found.get().getCreatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy | HH:mm:ss")),
+                found.get().getEvent().getTitle(),
+                found.get().getEvent().getPrice().multiply(BigDecimal.valueOf(found.get().getSeats())),
+                found.get().getUser().getEmail());
     }
-
-//    public List<Booking> getMyBookings(Long userId) {
-//        return bookingRepository.findAllByUserId(userId);
-//    }
 
     public List<BookingResponse> getMyBookings(String header) {
         String email = getEmailFromHeader(header);

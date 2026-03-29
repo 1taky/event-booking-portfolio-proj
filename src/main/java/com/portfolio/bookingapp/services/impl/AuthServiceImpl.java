@@ -18,7 +18,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
 
-    public ResponseEntity<String> register(User user) {
+    public String register(User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("Email already exists");
         }
@@ -27,13 +27,13 @@ public class AuthServiceImpl implements AuthService {
         user.setRole(Roles.ROLE_USER);
         userRepository.save(user);
 
-        return ResponseEntity.ok("User registered successfully");
+        return "User registered successfully";
     }
 
-    public ResponseEntity<String> login(User user) {
+    public String login(User user) {
         return userRepository.findByEmail(user.getEmail())
                 .filter(u -> passwordEncoder.matches(user.getPassword(), u.getPassword()))
-                .map(u -> ResponseEntity.ok(jwtService.generateJwtToken(u.getEmail())))
-                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials"));
+                .map(u -> jwtService.generateJwtToken(u.getEmail()))
+                .orElse("Invalid credentials");
     }
 }

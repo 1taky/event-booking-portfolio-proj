@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface VenueService {
     VenueResponse createVenue(VenueRequest request);
-    String updateVenue(Long id, VenueRequest request);
+    VenueResponse updateVenue(Long id, VenueRequest request);
     List<Venue> getAllVenues();
-    Venue getVenueById(long id);
+    VenueResponse getVenueById(long id);
     void deleteVenue(Long id);
 }

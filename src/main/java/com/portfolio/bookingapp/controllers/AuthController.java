@@ -3,6 +3,7 @@ package com.portfolio.bookingapp.controllers;
 import com.portfolio.bookingapp.models.User;
 import com.portfolio.bookingapp.services.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,11 +18,11 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
-        return authService.register(user);
+        return new ResponseEntity<>(authService.register(user), HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody User user) {
-        return authService.login(user);
+        return new ResponseEntity<>(authService.login(user),  HttpStatus.OK);
     }
 }

@@ -10,4 +10,6 @@ import java.util.Optional;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByVenueId(long venueId);
+
+    boolean getEventByTitleAndVenueId(String eventTitle, Long venueId);
 }
