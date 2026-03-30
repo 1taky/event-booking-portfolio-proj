@@ -30,7 +30,6 @@ public class AuthServiceImpl implements AuthService {
 
     public String login(User user) {
         return userRepository.findByEmail(user.getEmail())
-                .filter(u -> passwordEncoder.matches(user.getPassword(), u.getPassword()))
                 .map(u -> jwtService.generateJwtToken(u.getEmail()))
                 .orElse("Invalid credentials");
     }

@@ -63,16 +63,28 @@ public class EventServiceImpl implements EventService {
     public EventResponse updateEvent(Long id, EventRequest request)
             throws NotExistException {
         if (eventRepository.findById(id).isEmpty() || venueRepository.findById(request.getVenueId()).isEmpty()) {
-            throw new NotExistException("Venue not found");
+            throw new NotExistException("Event not found");
         }
 
-        Event event = new Event();
-        event.setTitle(request.getTitle());
-        event.setDescription(request.getDescription());
-        event.setPrice(request.getPrice());
-        event.setDateTime(request.getDateTime());
-        event.setAvailableSeats(request.getAvailableSeats());
-        event.setVenue(venueRepository.findById(request.getVenueId()).get());
+        Event event = eventRepository.findById(id).map(
+                e -> {
+                    e.setTitle(request.getTitle());
+                    e.setDescription(request.getDescription());
+                    e.setPrice(request.getPrice());
+                    e.setAvailableSeats(request.getAvailableSeats());
+                    e.setDateTime(request.getDateTime());
+                    e.setVenue(venueRepository.findById(request.getVenueId()).get());
+                    return eventRepository.save(e);
+                }
+        ).orElseThrow(() -> new NotExistException("Event not found"));
+
+//        Event event = new Event();
+//        event.setTitle(request.getTitle());
+//        event.setDescription(request.getDescription());
+//        event.setPrice(request.getPrice());
+//        event.setDateTime(request.getDateTime());
+//        event.setAvailableSeats(request.getAvailableSeats());
+//        event.setVenue().get());
 
         eventRepository.save(event);
 

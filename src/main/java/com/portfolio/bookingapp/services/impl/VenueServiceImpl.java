@@ -39,15 +39,19 @@ public class VenueServiceImpl implements VenueService {
         if(venueRepository.findById(id).isEmpty())
             throw new NotExistException("Venue not found");
 
-        Venue savedVenue = venueRepository.save(getVenueFromRequest(request));
+        Venue venue = venueRepository.findById(id).map(
+                v -> {
+                    v.setName(request.getName());
+                    v.setAddress(request.getAddress());
+                    return venueRepository.save(v);
+                }
+        ).orElseThrow(() -> new NotExistException("Venue not found"));
 
-        VenueResponse venueResponse = new VenueResponse(
-                savedVenue.getId(),
-                savedVenue.getName(),
-                savedVenue.getAddress()
+        return new VenueResponse(
+                venue.getId(),
+                venue.getName(),
+                venue.getAddress()
         );
-
-        return venueResponse ;
     }
 
     public VenueResponse getVenueById(long id)
