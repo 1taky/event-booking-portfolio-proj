@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,8 @@ import java.util.Optional;
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final VenueRepository venueRepository;
+
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy | HH:mm:ss");
 
     public EventResponse createEvent(EventRequest request)
             throws NotExistException {
@@ -41,13 +44,14 @@ public class EventServiceImpl implements EventService {
             event.setVenue(venue.get());
         }
 
-        if (eventRepository.getEventByTitleAndVenueId(event.getTitle(), event.getVenue().getId())) {
+        if (eventRepository.existsByTitleAndVenueId(event.getTitle(), event.getVenue().getId())) {
             throw new AlreadyExistException("Event already exists");
         }
 
         eventRepository.save(event);
 
         return new EventResponse(
+                event.getId(),
                 event.getTitle(),
                 event.getDescription(),
                 event.getAvailableSeats(),
@@ -56,24 +60,65 @@ public class EventServiceImpl implements EventService {
                 event.getVenue());
     }
 
-    public Event updateEvent(Long id, Event event)
+    public EventResponse updateEvent(Long id, EventRequest request)
             throws NotExistException {
-        if (eventRepository.findById(id).isEmpty() || venueRepository.findById(event.getVenue().getId()).isEmpty()) {
+        if (eventRepository.findById(id).isEmpty() || venueRepository.findById(request.getVenueId()).isEmpty()) {
             throw new NotExistException("Venue not found");
         }
 
-        return eventRepository.save(event);
+        Event event = new Event();
+        event.setTitle(request.getTitle());
+        event.setDescription(request.getDescription());
+        event.setPrice(request.getPrice());
+        event.setDateTime(request.getDateTime());
+        event.setAvailableSeats(request.getAvailableSeats());
+        event.setVenue(venueRepository.findById(request.getVenueId()).get());
+
+        eventRepository.save(event);
+
+        return new EventResponse(
+                event.getId(),
+                event.getTitle(),
+                event.getDescription(),
+                event.getAvailableSeats(),
+                event.getPrice(),
+                event.getDateTime().format(formatter),
+                event.getVenue()
+        );
     }
 
-    public Event getEventById(long id) throws IllegalArgumentException, NotExistException {
+    public EventResponse getEventById(long id) throws IllegalArgumentException, NotExistException {
         if (id <= 0) throw new IllegalArgumentException("Incorrect parameter for Event");
 
-        return eventRepository.findById(id)
+        Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new NotExistException("Event does not exist"));
+
+        return new EventResponse(
+                event.getId(),
+                event.getTitle(),
+                event.getDescription(),
+                event.getAvailableSeats(),
+                event.getPrice(),
+                event.getDateTime().format(formatter),
+                event.getVenue()
+        );
     }
 
-    public List<Event> getAllEvents() {
-        return eventRepository.findAll();
+    public List<EventResponse> getAllEvents() {
+        List<Event> events = eventRepository.findAll();
+        List<EventResponse> response = new ArrayList<>();
+
+        events.forEach(event -> response.add(new EventResponse(
+                event.getId(),
+                event.getTitle(),
+                event.getDescription(),
+                event.getAvailableSeats(),
+                event.getPrice(),
+                event.getDateTime().format(formatter),
+                event.getVenue()
+        )));
+
+        return response;
     }
 
     public void deleteEvent(Long id) throws IllegalArgumentException, NotExistException {

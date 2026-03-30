@@ -18,8 +18,8 @@ public class BookingsController {
     private final BookingService bookingService;
 
     @GetMapping("/my")
-    public List<BookingResponse> getMyBookings(@RequestHeader("Authorization") String header) {
-        return bookingService.getMyBookings(header);
+    public ResponseEntity<List<BookingResponse>> getMyBookings(@RequestHeader("Authorization") String header) {
+        return new ResponseEntity<>(bookingService.getMyBookings(header), HttpStatus.OK);
     }
 
     @PostMapping
@@ -28,8 +28,7 @@ public class BookingsController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> cancelBooking(@PathVariable Long id,  @RequestBody BookingRequest booking) {
-        bookingService.cancelBooking(id, booking);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<BookingResponse> cancelBooking(@PathVariable Long id) {
+        return new ResponseEntity<>(bookingService.cancelBooking(id),  HttpStatus.OK);
     }
 }

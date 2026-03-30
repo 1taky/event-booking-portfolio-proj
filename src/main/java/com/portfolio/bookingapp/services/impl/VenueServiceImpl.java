@@ -8,8 +8,6 @@ import com.portfolio.bookingapp.models.Venue;
 import com.portfolio.bookingapp.repositories.VenueRepository;
 import com.portfolio.bookingapp.services.VenueService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,18 +17,20 @@ import java.util.List;
 public class VenueServiceImpl implements VenueService {
     private final VenueRepository venueRepository;
 
-    // method to save place where event would be.
-    // !! add duplicate check !!
     public VenueResponse createVenue(VenueRequest request) {
         Venue venue = getVenueFromRequest(request);
 
+        if (venueRepository.existsByAddressAndName(request.getAddress(), request.getName())) {
+            throw new AlreadyExistException("Venue already exists");
+        }
+
         Venue savedVenue = venueRepository.save(venue);
 
-        VenueResponse venueResponse = new VenueResponse();
-        venueResponse.setId(savedVenue.getId());
-        venueResponse.setName(savedVenue.getName());
-        venueResponse.setAddress(savedVenue.getAddress());
-
+        VenueResponse venueResponse = new VenueResponse(
+                savedVenue.getId(),
+                savedVenue.getName(),
+                savedVenue.getAddress()
+        );
 
         return venueResponse;
     }
@@ -41,10 +41,11 @@ public class VenueServiceImpl implements VenueService {
 
         Venue savedVenue = venueRepository.save(getVenueFromRequest(request));
 
-        VenueResponse venueResponse = new VenueResponse();
-        venueResponse.setId(savedVenue.getId());
-        venueResponse.setName(savedVenue.getName());
-        venueResponse.setAddress(savedVenue.getAddress());
+        VenueResponse venueResponse = new VenueResponse(
+                savedVenue.getId(),
+                savedVenue.getName(),
+                savedVenue.getAddress()
+        );
 
         return venueResponse ;
     }
@@ -52,13 +53,14 @@ public class VenueServiceImpl implements VenueService {
     public VenueResponse getVenueById(long id)
             throws IllegalArgumentException, NotExistException {
         if (id <= 0) throw new IllegalArgumentException("Incorrect parameter for Venue");
-        Venue saved = venueRepository.findById(id)
+        Venue savedVenue = venueRepository.findById(id)
                 .orElseThrow(() -> new NotExistException("Venue does not exist"));
 
-        VenueResponse venueResponse = new VenueResponse();
-        venueResponse.setId(saved.getId());
-        venueResponse.setName(saved.getName());
-        venueResponse.setAddress(saved.getAddress());
+        VenueResponse venueResponse = new VenueResponse(
+                savedVenue.getId(),
+                savedVenue.getName(),
+                savedVenue.getAddress()
+        );
 
         return venueResponse;
     }

@@ -31,7 +31,9 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final JwtService jwtService;
 
-    public synchronized BookingResponse createBooking(String header, BookingRequest request)
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy | HH:mm:ss");
+
+    public BookingResponse createBooking(String header, BookingRequest request)
     throws IncorrectDataException {
         String email = getEmailFromHeader(header);
         Booking booking = new Booking();
@@ -57,40 +59,41 @@ public class BookingServiceImpl implements BookingService {
 
         return new BookingResponse(
                 saved.getId(),
+                saved.getBookingStatus(),
                 saved.getSeats(),
-                saved.getCreatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy | HH:mm:ss")),
+                saved.getCreatedAt().format(formatter),
                 event.get().getTitle(),
                 event.get().getPrice().multiply(BigDecimal.valueOf(saved.getSeats())),
                 saved.getUser().getEmail()
         );
     }
 
-    public BookingResponse cancelBooking(Long id, BookingRequest booking)
+    public BookingResponse cancelBooking(Long id)
             throws IncorrectDataException {
-        Event event = eventRepository.findById(booking.getEventId()).orElseThrow(
+        Booking found = bookingRepository.findById(id).orElseThrow(
+                () -> new NotExistException("Booking not found"));
+        Event event = eventRepository.findById(found.getEvent().getId()).orElseThrow(
                 () -> new NotExistException("Event not found"));
 
-        Optional<Booking> found = bookingRepository.findById(id);
-
-        if (found.isPresent()) {
-            if (found.get().getBookingStatus().equals(BookingStatus.CONFIRMED)) {
-                event.setAvailableSeats(event.getAvailableSeats() + booking.getSeats());
-                found.get().setBookingStatus(BookingStatus.CANCELLED);
+            if (found.getBookingStatus().equals(BookingStatus.CONFIRMED)) {
+                event.setAvailableSeats(event.getAvailableSeats() + found.getSeats());
+                found.setBookingStatus(BookingStatus.CANCELLED);
                 eventRepository.save(event);
             }
-            else if(found.get().getBookingStatus().equals(BookingStatus.CANCELLED))
+            else if(found.getBookingStatus().equals(BookingStatus.CANCELLED))
                 throw new IncorrectDataException("Booking is already cancelled");
+            else
+                throw new IncorrectDataException("Incorrect booking id or status");
 
-        } else throw new IncorrectDataException("Incorrect booking id or status");
-
-        bookingRepository.save(found.get());
+        bookingRepository.save(found);
         return new BookingResponse(
-                found.get().getId(),
-                found.get().getSeats(),
-                found.get().getCreatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy | HH:mm:ss")),
-                found.get().getEvent().getTitle(),
-                found.get().getEvent().getPrice().multiply(BigDecimal.valueOf(found.get().getSeats())),
-                found.get().getUser().getEmail());
+                found.getId(),
+                found.getBookingStatus(),
+                found.getSeats(),
+                found.getCreatedAt().format(formatter),
+                found.getEvent().getTitle(),
+                found.getEvent().getPrice().multiply(BigDecimal.valueOf(found.getSeats())),
+                found.getUser().getEmail());
     }
 
     public List<BookingResponse> getMyBookings(String header) {
@@ -104,8 +107,9 @@ public class BookingServiceImpl implements BookingService {
         userBookings.forEach(userBooking -> {
             BookingResponse bookingResponse = new BookingResponse(
                     userBooking.getId(),
+                    userBooking.getBookingStatus(),
                     userBooking.getSeats(),
-                    userBooking.getCreatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy | HH:mm:ss")),
+                    userBooking.getCreatedAt().format(formatter),
                     userBooking.getEvent().getTitle(),
                     userBooking.getEvent().getPrice().multiply(BigDecimal.valueOf(userBooking.getSeats())),
                     userBooking.getUser().getEmail());
@@ -116,7 +120,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private String getEmailFromHeader(String header) {
-        if (header.isEmpty() || !header.startsWith("Bearer ")) {
+        if (!header.startsWith("Bearer ")) {
             throw new IncorrectDataException("Token invalid");
         }
 

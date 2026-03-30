@@ -2,7 +2,6 @@ package com.portfolio.bookingapp.controllers;
 
 import com.portfolio.bookingapp.dto.EventRequest;
 import com.portfolio.bookingapp.dto.EventResponse;
-import com.portfolio.bookingapp.models.Event;
 import com.portfolio.bookingapp.services.EventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,13 +17,13 @@ public class EventController {
     private final EventService eventService;
 
     @GetMapping
-    public List<Event> getEvents() {
-        return eventService.getAllEvents();
+    public ResponseEntity<List<EventResponse>> getEvents() {
+        return new ResponseEntity<>(eventService.getAllEvents(), HttpStatus.OK);
     }
 
     @GetMapping("{id}")
-    public Event getEvent(@PathVariable Long id) {
-        return eventService.getEventById(id);
+    public ResponseEntity<EventResponse> getEvent(@PathVariable Long id) {
+        return new ResponseEntity<>(eventService.getEventById(id), HttpStatus.OK);
     }
 
     @PostMapping
@@ -33,8 +32,8 @@ public class EventController {
     }
 
     @PutMapping("{id}")
-    public Event updateEvent(@PathVariable Long id, @RequestBody Event event) {
-        return eventService.updateEvent(id, event);
+    public ResponseEntity<EventResponse> updateEvent(@PathVariable Long id, @RequestBody EventRequest event) {
+        return new ResponseEntity<>(eventService.updateEvent(id, event), HttpStatus.OK);
     }
 
     @DeleteMapping("{id}")

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class JwtService {
@@ -18,7 +19,7 @@ public class JwtService {
         return Jwts.builder()
                 .subject(email)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() * 1000 * 60 * 60))
+                .expiration(new Date(new Date().getTime() + TimeUnit.MINUTES.toMillis(60)))
                 .signWith(getSignKey())
                 .compact();
     }
@@ -33,16 +34,11 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token) {
-        try {
             Jwts.parser()
                     .verifyWith(getSignKey())
                     .build()
-                    .parseClaimsJws(token);
+                    .parseSignedClaims(token);
             return true;
-        }
-        catch (Exception e) {
-            return false;
-        }
     }
 
     private SecretKey getSignKey() {

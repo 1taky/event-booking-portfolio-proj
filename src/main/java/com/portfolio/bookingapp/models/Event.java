@@ -23,7 +23,6 @@ public class Event {
     Integer availableSeats;
     BigDecimal price;
 
-    @JsonFormat(pattern = "dd-MM-yyyy | HH:mm:ss")
     LocalDateTime dateTime;
 
     @ManyToOne

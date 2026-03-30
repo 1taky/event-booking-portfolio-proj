@@ -11,5 +11,5 @@ import java.util.Optional;
 public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByVenueId(long venueId);
 
-    boolean getEventByTitleAndVenueId(String eventTitle, Long venueId);
+    boolean existsByTitleAndVenueId(String eventTitle, Long venueId);
 }

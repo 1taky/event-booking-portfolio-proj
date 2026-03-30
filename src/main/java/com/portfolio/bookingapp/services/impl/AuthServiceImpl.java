@@ -6,8 +6,6 @@ import com.portfolio.bookingapp.repositories.UserRepository;
 import com.portfolio.bookingapp.security.JwtService;
 import com.portfolio.bookingapp.services.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +18,7 @@ public class AuthServiceImpl implements AuthService {
 
     public String register(User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already exists");
+            return "Email already exists";
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
