@@ -28,7 +28,7 @@ public class VenueController {
     }
 
     @PostMapping
-    public ResponseEntity<VenueResponse> addVenue(@RequestBody VenueRequest request) {
+    public ResponseEntity<VenueResponse> createVenue(@RequestBody VenueRequest request) {
         return new ResponseEntity<>(venueService.createVenue(request), HttpStatus.CREATED);
     }
 
