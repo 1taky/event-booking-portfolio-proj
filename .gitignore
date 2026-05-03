@@ -37,8 +37,8 @@ build/
 mvnw
 mvnw.cmd
 pom.xml
-Dockerfile
-docker-compose.yml
 application.properties
+
+.env
 
 
